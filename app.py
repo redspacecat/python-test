@@ -1,7 +1,7 @@
 import scratchattach as sa
 import requests
 import json, os
-import keep_alive from keep_alive
+from keep_alive import keep_alive
 
 session_id = os.environ.get("SESSION_ID")
 session = sa.login_by_id(session_id, username=os.environ.get("USERNAME")) #replace with your session_id and username
