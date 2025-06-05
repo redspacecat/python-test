@@ -1,6 +1,7 @@
 import scratchattach as sa
 import requests
 import json, os
+import keep_alive from keep_alive
 
 session_id = os.environ.get("SESSION_ID")
 session = sa.login_by_id(session_id, username=os.environ.get("USERNAME")) #replace with your session_id and username
@@ -26,4 +27,5 @@ def message_count(username): #called when client receives request
 def on_ready():
     print("Request handler is running")
 
+keep_alive
 client.start(thread=True) # thread=True is an optional argument. It makes the cloud requests handler run in a thread
