@@ -1,6 +1,7 @@
 import scratchattach as sa
 import requests
 import urllib.request
+from PIL import Image
 import json, os
 from keep_alive import keep_alive
 
