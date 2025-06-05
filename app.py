@@ -5,7 +5,7 @@ from keep_alive import keep_alive
 
 session_id = os.environ.get("SESSION_ID")
 session = sa.login_by_id(session_id, username=os.environ.get("USERNAME")) #replace with your session_id and username
-cloud = session.connect_cloud(1184958260) #replace with your project id
+cloud = session.connect_cloud(992640266) #replace with your project id
 client = cloud.requests()
 
 @client.request
@@ -16,11 +16,11 @@ def ping(): #called when client receives request
 @client.request
 def message_count(username): #called when client receives request
     print("Getting message count for", username)
-    # try:
-    r = requests.get(f"https://api.scratch.mit.edu/users/{username}/messages/count")
-    count = json.loads(r.text)["count"]
-    # except:
-    # return "There was an error while fetching message count"
+    try:
+        r = requests.get(f"https://api.scratch.mit.edu/users/{username}/messages/count")
+        count = json.loads(r.text)["count"]
+    except:
+        return "Error"
     return count
 
 @client.event
