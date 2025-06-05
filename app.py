@@ -37,12 +37,14 @@ def ping(): #called when client receives request
 
 @client2.request
 def pfp(username, resolution):
-    try:
         print(f"Profile picture requested for {username}")
 
-        user = sa.get_user(username).id
+        try:
+            user = sa.get_user(username).id
+        except:
+            return "User Not Found"
         url = "https://uploads.scratch.mit.edu/get_image/user/" + str(user) + "_100x100.png"
-        urllib.request.urlretrieve(url, "avatar.png")
+        urllib.request.urlretrieve(url, "/tmp/avatar.png")
 
         img = Image.open("avatar.png").convert("RGBA")
         img = img.resize((int(resolution), int(resolution)))
@@ -56,8 +58,6 @@ def pfp(username, resolution):
                 color = a * 16777216 + r * 65536 + g * 256 + b
                 colors.append(color)
         return colors
-    except:
-        return "User Not Found"
 
 @client2.event
 def on_ready():
