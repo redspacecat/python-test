@@ -56,7 +56,7 @@ def pfp(username, resolution):
                 color = a * 16777216 + r * 65536 + g * 256 + b
                 colors.append(color)
         return colors
-    except sa.exceptions.UserNotFound:
+    except:
         return "User Not Found"
 
 @client2.event
