@@ -1,5 +1,6 @@
 import scratchattach as sa
 import requests
+import urllib.request
 import json, os
 from keep_alive import keep_alive
 
