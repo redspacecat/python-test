@@ -27,5 +27,5 @@ def message_count(username): #called when client receives request
 def on_ready():
     print("Request handler is running")
 
-keep_alive
+keep_alive()
 client.start(thread=True) # thread=True is an optional argument. It makes the cloud requests handler run in a thread
