@@ -48,7 +48,7 @@ def pfp(username, resolution):
         url = "https://uploads.scratch.mit.edu/get_image/user/" + str(user) + "_100x100.png"
         urllib.request.urlretrieve(url, "/tmp/avatar.png")
 
-        img = Image.open("avatar.png").convert("RGBA")
+        img = Image.open("/tmp/avatar.png").convert("RGBA")
         img = img.resize((int(resolution), int(resolution)))
         width, height = img.size
         pixels = img.load()
