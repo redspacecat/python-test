@@ -87,8 +87,12 @@ def get_pfp(username):
     image_name = f"pfp-{random.randint(0, 10000000)}.png" #give image unique id
     # print(f"Image stored in: {os.path.join("/tmp", 'pfps', image_name)}")
     print(f"Image stored in /tmp/pfps/{image_name}")
-    with open(f"/tmp/pfps/{image_name}", "wb") as f:  #store image
-        f.write(r.content)
+    try:
+        with open(f"/tmp/pfps/{image_name}", "wb") as f:  #store image
+            f.write(r.content)
+    except Exception as e:
+        print(e)
+        print(e.with_traceback())
 
     # img_url = requests.get(f"https://tinyurl.com/api-create.php?url={urllib.parse.quote_plus(img_url)}").text
     return image_name #return image data
