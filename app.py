@@ -84,7 +84,7 @@ def get_pfp(username):
     img_url = f"https://uploads.scratch.mit.edu/get_image/user/{user_id}_100x100.png"
     # r = requests.get(img_url)
     print(f"Image url: {img_url}")
-    image_name = f"pfp-{random.randint(0, 10000000)}.png" #give image unique id
+    image_name = f"pfp{random.randint(0, 10000000)}.png" #give image unique id
     urllib.request.urlretrieve(img_url, f"/tmp/{image_name}")
     # print(f"Image stored in: {os.path.join("/tmp", 'pfps', image_name)}")
     print(f"Image stored in /tmp/{image_name}")
