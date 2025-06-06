@@ -76,7 +76,7 @@ def ping(): #called when client receives request
 
 @client2.request
 def get_pfp(username):
-    try:
+    # try:
         try:
             user_id = sa.get_user(username).id
         except:
@@ -97,9 +97,9 @@ def get_pfp(username):
         # img_url = requests.get(f"https://tinyurl.com/api-create.php?url={urllib.parse.quote_plus(img_url)}").text
         return image_name #return image data
             
-    except Exception:
-        print("There was a error")
-        return "There was a error."
+    # except Exception:
+    #     print("There was a error")
+    #     return "There was a error."
 
 @client2.request
 def get_image_piece(img_id, y_offset, img_size, username): #call this function with different amounts of offset to get the image
