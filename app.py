@@ -123,7 +123,7 @@ def get_image_piece(img_id, y_offset, img_size, username): #call this function w
 @client2.request
 def done(img_id):
     try:
-        os.remove(f"/tmp/pfps/{str(img_id).replace("/", "").replace("\\", "")}")
+        os.remove(f'/tmp/pfps/{str(img_id).replace("/", "").replace("\\", "")}')
         print("Removing file", img_id)
         return "Done"
     except:
