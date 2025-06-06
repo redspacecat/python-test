@@ -5,6 +5,10 @@ from PIL import Image
 import json, os
 from keep_alive import keep_alive
 
+
+if not os.path.isdir('/tmp/pfps'):
+    os.mkdir('/tmp/pfps')
+
 session_id = os.environ.get("SESSION_ID")
 session = sa.login_by_id(session_id, username=os.environ.get("USERNAME")) #replace with your session_id and username
 cloud1 = session.connect_cloud(992640266) #replace with your project id
@@ -32,38 +36,101 @@ def on_ready():
     print("Request handler for message count is running")
 
 
+# @client2.request
+# def ping(): #called when client receives request
+#     print("Ping request received")
+#     return "pong" #sends back 'pong' to the Scratch project
+
+# @client2.request
+# def pfp(username, resolution):
+#         print(f"Profile picture requested for {username}")
+
+#         try:
+#             user = sa.get_user(username).id
+#         except:
+#             return "User Not Found"
+#         url = "https://uploads.scratch.mit.edu/get_image/user/" + str(user) + "_100x100.png"
+#         urllib.request.urlretrieve(url, "/tmp/avatar.png")
+
+#         img = Image.open("/tmp/avatar.png").convert("RGBA")
+#         img = img.resize((int(resolution), int(resolution)))
+#         width, height = img.size
+#         pixels = img.load()
+
+#         colors = []
+#         for y in range(height):
+#             for x in range(width):
+#                 r, g, b, a = pixels[x, y]
+#                 color = a * 16777216 + r * 65536 + g * 256 + b
+#                 colors.append(color)
+#         return colors
+
+# @client2.event
+# def on_ready():
+#     print("Request handler for pfp loader is running")
+
 @client2.request
 def ping(): #called when client receives request
-    print("Ping request received")
+    print(f"Ping")
     return "pong" #sends back 'pong' to the Scratch project
 
 @client2.request
-def pfp(username, resolution):
-        print(f"Profile picture requested for {username}")
-
+def get_pfp(username):
+    try:
         try:
-            user = sa.get_user(username).id
+            user_id = sa.get_user(username).id
         except:
             return "User Not Found"
-        url = "https://uploads.scratch.mit.edu/get_image/user/" + str(user) + "_100x100.png"
-        urllib.request.urlretrieve(url, "/tmp/avatar.png")
+        img_url = f"https://uploads.scratch.mit.edu/get_image/user/{user_id}_100x100.png"
+        r = requests.get(img_url)
+        print(f"Image url: {img_url}")
+        image_name = f"pfp-{random.randint(0, 10000000)}.png" #give image unique id
+        print(f"Image stored in: {os.path.join("/tmp", 'pfps', image_name)}")
+        if "Internal Server Error" in str(r.content):
+            print("Image generation internal server error")
+            return "Error: Check the python console"
+        else:
+            with open(os.path.join("/tmp", "pfps", image_name), "wb") as f:  #store image
+                f.write(r.content)
 
-        img = Image.open("/tmp/avatar.png").convert("RGBA")
-        img = img.resize((int(resolution), int(resolution)))
-        width, height = img.size
-        pixels = img.load()
+        # img_url = requests.get(f"https://tinyurl.com/api-create.php?url={urllib.parse.quote_plus(img_url)}").text
+        return image_name #return image data
+            
+    except Exception:
+        print("There was a error")
+        return "There was a error."
 
-        colors = []
-        for y in range(height):
-            for x in range(width):
-                r, g, b, a = pixels[x, y]
-                color = a * 16777216 + r * 65536 + g * 256 + b
-                colors.append(color)
-        return colors
+@client2.request
+def get_image_piece(img_id, y_offset, img_size, username): #call this function with different amounts of offset to get the image
+    img_id = img_id.replace("/", "").replace("\\", "")
+    img = Image.open(os.path.join("/tmp", "pfps", img_id)).convert("RGBA") #open image based on id
+    img = img.resize((int(img_size), int(img_size)))
+    width, height = img.size
+    pixels = img.load()
+
+    amount = 10
+
+    colors = [] #construct colors list
+    for y in range(int(y_offset), int(y_offset) + int(amount)): #get a specific chunk of the image
+        for x in range(width):
+            r, g, b, a = pixels[x, y]
+            color = a * 16777216 + r * 65536 + g * 256 + b
+            colors.append(color)
+    print(username, 'requested image piece for image "' + img_id + '" with y offset', y_offset)
+    return colors #return data
+
+@client2.request
+def done(img_id):
+    try:
+        os.remove(os.path.join("/tmp", "pfps", str(img_id).replace("/", "").replace("\\", "")))
+        print("Removing file", img_id)
+        return "Done"
+    except:
+        return "Error deleting file"
 
 @client2.event
 def on_ready():
-    print("Request handler for pfp loader is running")
+    print("Request handler is running")
 
 keep_alive()
 client1.start()
