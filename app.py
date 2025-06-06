@@ -2,9 +2,14 @@ import scratchattach as sa
 import requests
 import urllib.request
 from PIL import Image
-import json, os, random
+import json, os, random, math
 from keep_alive import keep_alive
 
+def convertToNumber (s):
+    return int.from_bytes(s.encode(), 'little')
+
+def convertFromNumber (n):
+    return n.to_bytes(math.ceil(n.bit_length() / 8), 'little').decode()
 
 # if not os.path.isdir('/tmp/pfps'):
 #     os.mkdir('/tmp/pfps')
@@ -84,7 +89,8 @@ def get_pfp(username):
     img_url = f"https://uploads.scratch.mit.edu/get_image/user/{user_id}_100x100.png"
     # r = requests.get(img_url)
     print(f"Image url: {img_url}")
-    image_name = f"pfp{random.randint(0, 10000000)}.png" #give image unique id
+    # image_name = f"pfp{random.randint(0, 10000000)}.png" #give image unique id
+    image_name = f"pfp{convertToNumber(username)}.png"
     urllib.request.urlretrieve(img_url, f"/tmp/{image_name}")
     # print(f"Image stored in: {os.path.join("/tmp", 'pfps', image_name)}")
     print(f"Image stored in /tmp/{image_name}")
