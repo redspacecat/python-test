@@ -85,12 +85,13 @@ def get_pfp(username):
         r = requests.get(img_url)
         print(f"Image url: {img_url}")
         image_name = f"pfp-{random.randint(0, 10000000)}.png" #give image unique id
-        print(f"Image stored in: {os.path.join("/tmp", 'pfps', image_name)}")
+        # print(f"Image stored in: {os.path.join("/tmp", 'pfps', image_name)}")
+        print(f"Image stored in /tmp/pfps/{image_name}")
         if "Internal Server Error" in str(r.content):
             print("Image generation internal server error")
             return "Error: Check the python console"
         else:
-            with open(os.path.join("/tmp", "pfps", image_name), "wb") as f:  #store image
+            with open(f"/tmp/pfps/{image_name}", "wb") as f:  #store image
                 f.write(r.content)
 
         # img_url = requests.get(f"https://tinyurl.com/api-create.php?url={urllib.parse.quote_plus(img_url)}").text
@@ -103,7 +104,7 @@ def get_pfp(username):
 @client2.request
 def get_image_piece(img_id, y_offset, img_size, username): #call this function with different amounts of offset to get the image
     img_id = img_id.replace("/", "").replace("\\", "")
-    img = Image.open(os.path.join("/tmp", "pfps", img_id)).convert("RGBA") #open image based on id
+    img = Image.open(f"/tmp/pfps/{img_id}").convert("RGBA") #open image based on id
     img = img.resize((int(img_size), int(img_size)))
     width, height = img.size
     pixels = img.load()
@@ -122,7 +123,7 @@ def get_image_piece(img_id, y_offset, img_size, username): #call this function w
 @client2.request
 def done(img_id):
     try:
-        os.remove(os.path.join("/tmp", "pfps", str(img_id).replace("/", "").replace("\\", "")))
+        os.remove(f"/tmp/pfps/{str(img_id).replace("/", "").replace("\\", "")}")
         print("Removing file", img_id)
         return "Done"
     except:
