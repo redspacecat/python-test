@@ -77,25 +77,21 @@ def ping(): #called when client receives request
 @client2.request
 def get_pfp(username):
     # try:
-        try:
-            user_id = sa.get_user(username).id
-        except:
-            return "User Not Found"
-        img_url = f"https://uploads.scratch.mit.edu/get_image/user/{user_id}_100x100.png"
-        r = requests.get(img_url)
-        print(f"Image url: {img_url}")
-        image_name = f"pfp-{random.randint(0, 10000000)}.png" #give image unique id
-        # print(f"Image stored in: {os.path.join("/tmp", 'pfps', image_name)}")
-        print(f"Image stored in /tmp/pfps/{image_name}")
-        if "Internal Server Error" in str(r.content):
-            print("Image generation internal server error")
-            return "Error: Check the python console"
-        else:
-            with open(f"/tmp/pfps/{image_name}", "wb") as f:  #store image
-                f.write(r.content)
+    try:
+        user_id = sa.get_user(username).id
+    except:
+        return "User Not Found"
+    img_url = f"https://uploads.scratch.mit.edu/get_image/user/{user_id}_100x100.png"
+    r = requests.get(img_url)
+    print(f"Image url: {img_url}")
+    image_name = f"pfp-{random.randint(0, 10000000)}.png" #give image unique id
+    # print(f"Image stored in: {os.path.join("/tmp", 'pfps', image_name)}")
+    print(f"Image stored in /tmp/pfps/{image_name}")
+    with open(f"/tmp/pfps/{image_name}", "wb") as f:  #store image
+        f.write(r.content)
 
-        # img_url = requests.get(f"https://tinyurl.com/api-create.php?url={urllib.parse.quote_plus(img_url)}").text
-        return image_name #return image data
+    # img_url = requests.get(f"https://tinyurl.com/api-create.php?url={urllib.parse.quote_plus(img_url)}").text
+    return image_name #return image data
             
     # except Exception:
     #     print("There was a error")
