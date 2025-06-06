@@ -95,6 +95,7 @@ def get_pfp(username):
         print(e.with_traceback())
 
     # img_url = requests.get(f"https://tinyurl.com/api-create.php?url={urllib.parse.quote_plus(img_url)}").text
+    print("img id", image_name)
     return image_name #return image data
             
     # except Exception:
