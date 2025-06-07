@@ -115,7 +115,11 @@ def get_pfp(username):
 @client2.request
 def get_image_piece(img_id, y_offset, img_size, username): #call this function with different amounts of offset to get the image
     img_id = img_id.replace("/", "").replace("\\", "")
-    img = Image.open(f"/tmp/{img_id}").convert("RGBA") #open image based on id
+    try:
+        img = Image.open(f"/tmp/{img_id}").convert("RGBA") #open image based on id
+    except:
+        log("Failed to get image data from", img_id, "by", username)
+        return "Error getting image data"
     img = img.resize((int(img_size), int(img_size)))
     width, height = img.size
     pixels = img.load()
