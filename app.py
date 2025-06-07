@@ -26,8 +26,8 @@ cloud2 = session.connect_cloud(996217996)
 client2 = cloud2.requests()
 
 @client1.request
-def ping(username): #called when client receives request
-    log("Ping request received from", username)
+def ping(): #called when client receives request
+    log("Ping request received for message count")
     return "pong"
 
 @client1.request
@@ -79,8 +79,8 @@ def on_ready():
 #     log("Request handler for pfp loader is running")
 
 @client2.request
-def ping(): #called when client receives request
-    log(f"Ping")
+def ping(username): #called when client receives request
+    log(f"Ping request received from {username}")
     return "pong" #sends back 'pong' to the Scratch project
 
 @client2.request
