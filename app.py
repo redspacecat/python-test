@@ -26,8 +26,8 @@ cloud2 = session.connect_cloud(996217996)
 client2 = cloud2.requests()
 
 @client1.request
-def ping(): #called when client receives request
-    log("Ping request received")
+def ping(username): #called when client receives request
+    log("Ping request received from", username)
     return "pong"
 
 @client1.request
