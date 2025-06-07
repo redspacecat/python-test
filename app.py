@@ -27,12 +27,12 @@ client2 = cloud2.requests()
 
 @client1.request
 def ping(): #called when client receives request
-    print("Ping request received")
+    log("Ping request received")
     return "pong"
 
 @client1.request
 def message_count(username): #called when client receives request
-    print("Getting message count for", username)
+    log("Getting message count for", username)
     try:
         r = requests.get(f"https://api.scratch.mit.edu/users/{username}/messages/count")
         count = json.loads(r.text)["count"]
@@ -42,17 +42,17 @@ def message_count(username): #called when client receives request
 
 @client1.event
 def on_ready():
-    print("Request handler for message count is running")
+    log("Request handler for message count is running")
 
 
 # @client2.request
 # def ping(): #called when client receives request
-#     print("Ping request received")
+#     log("Ping request received")
 #     return "pong" #sends back 'pong' to the Scratch project
 
 # @client2.request
 # def pfp(username, resolution):
-#         print(f"Profile picture requested for {username}")
+#         log(f"Profile picture requested for {username}")
 
 #         try:
 #             user = sa.get_user(username).id
@@ -76,11 +76,11 @@ def on_ready():
 
 # @client2.event
 # def on_ready():
-#     print("Request handler for pfp loader is running")
+#     log("Request handler for pfp loader is running")
 
 @client2.request
 def ping(): #called when client receives request
-    print(f"Ping")
+    log(f"Ping")
     return "pong" #sends back 'pong' to the Scratch project
 
 @client2.request
@@ -92,25 +92,25 @@ def get_pfp(username):
         return "User Not Found"
     img_url = f"https://uploads.scratch.mit.edu/get_image/user/{user_id}_100x100.png"
     # r = requests.get(img_url)
-    print(f"Image url: {img_url}")
+    log(f"Image url: {img_url}")
     # image_name = f"pfp{random.randint(0, 10000000)}.png" #give image unique id
     image_name = f"pfp{convertToNumber(username)}.png"
     urllib.request.urlretrieve(img_url, f"/tmp/{image_name}")
-    # print(f"Image stored in: {os.path.join("/tmp", 'pfps', image_name)}")
-    print(f"Image stored in /tmp/{image_name}")
+    # log(f"Image stored in: {os.path.join("/tmp", 'pfps', image_name)}")
+    log(f"Image stored in /tmp/{image_name}")
     # try:
     #     with open(f"/tmp/pfps/{image_name}", "wb") as f:  #store image
     #         f.write(r.content)
     # except Exception as e:
-    #     print(e)
-    #     print(e.with_traceback())
+    #     log(e)
+    #     log(e.with_traceback())
 
     # img_url = requests.get(f"https://tinyurl.com/api-create.php?url={urllib.parse.quote_plus(img_url)}").text
-    print("img id", image_name)
+    log("img id", image_name)
     return image_name #return image data
             
     # except Exception:
-    #     print("There was a error")
+    #     log("There was a error")
     #     return "There was a error."
 
 @client2.request
@@ -129,23 +129,23 @@ def get_image_piece(img_id, y_offset, img_size, username): #call this function w
             r, g, b, a = pixels[x, y]
             color = a * 16777216 + r * 65536 + g * 256 + b
             colors.append(color)
-    print(username, 'requested image piece for image "' + img_id + '" with y offset', y_offset)
+    log(username, 'requested image piece for image "' + img_id + '" with y offset', y_offset)
     return colors #return data
 
 @client2.request
 def done(img_id):
     try:
         os.remove(f'/tmp/{str(img_id)}')
-        print("Removing file", img_id)
+        log("Removing file", img_id)
         return "Done"
     except:
         return "Error deleting file"
 
 @client2.event
 def on_ready():
-    print("Request handler is running")
+    log("Request handler is running")
 
 keep_alive()
 client1.start()
 client2.start()
-print("Started stuff")
+log("Started stuff")
