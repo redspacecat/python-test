@@ -5,9 +5,8 @@ from PIL import Image
 import json, os, random, math, time
 from keep_alive import keep_alive
 
-def log(stuff):
-    stuff.insert(0, f"[{round(time.time())}]")
-    print(stuff)
+def log(*args):
+    print(f"[{round(time.time())}]", *args)
 
 def convertToNumber (s):
     return int.from_bytes(s.encode(), 'little')
