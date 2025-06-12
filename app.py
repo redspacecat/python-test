@@ -347,12 +347,15 @@ def handle_pfp(username, resolution):
         return "User Not Found"
     
 
-def handle_project_thumbnail(id, higher_quality):
+def handle_project_thumbnail(id, higher_quality, isTw=False):
     try:
         print(f"Project thumbnail requested for {id}")
 
         if higher_quality == "1":
-            url = "https://uploads.scratch.mit.edu/get_image/project/" + str(id) + "_40x30.png"
+            if (isTw):
+                url = "https://uploads.scratch.mit.edu/get_image/project/" + str(id) + "_80x60.png"
+            else:
+                url = "https://uploads.scratch.mit.edu/get_image/project/" + str(id) + "_40x30.png"
         else:
             url = "https://uploads.scratch.mit.edu/get_image/project/" + str(id) + "_20x15.png"
         r = requests.get(url)
@@ -424,7 +427,7 @@ def pfp(*args):
     return handle_pfp(*args)
 @client4.request
 def project_thumbnail(*args):
-    return handle_project_thumbnail(*args)
+    return handle_project_thumbnail(*args, True)
 
 @client4.event
 def on_ready():
