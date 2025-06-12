@@ -179,15 +179,12 @@ def on_ready():
 ## Scratch Explorer
 ##
 
-@client3.request
-@client4.request
-def ping(username): #called when client receives request
+# Functions
+def handle_ping(username): #called when client receives request
     print(f"Ping for Scratch Explorer from {username}")
     return "pong" #sends back 'pong' to the Scratch project
 
-@client3.request
-@client4.request
-def get_user_data(username): #called when client receives request
+def handle_get_user_data(username): #called when client receives request
     print(f"getting data for {username}")
     try:
         r = requests.get(f"https://scratch-info.vercel.app/api/v1/users/{username}/info?mode=all", timeout=6)
@@ -210,9 +207,7 @@ def get_user_data(username): #called when client receives request
     print(f"returning data for {username}")
     return data
 
-@client3.request
-@client4.request
-def get_project_data(id):
+def handle_get_project_data(id):
     try:
         id = round(int(id))
     except:
@@ -252,9 +247,7 @@ def get_project_data(id):
     return data
 
 
-@client3.request
-@client4.request
-def get_project_thumb_hq(id):
+def handle_get_project_thumb_hq(id):
     try:
         img_url = f"https://uploads.scratch.mit.edu/get_image/project/{id}_480x360.png"
         r = requests.get(img_url)
@@ -265,9 +258,7 @@ def get_project_thumb_hq(id):
     except:
         return "Error"
 
-@client3.request
-@client4.request
-def get_image_piece(img_id, y_offset, width, height, username): #call this function with different amounts of offset to get the image
+def handle_get_image_piece(img_id, y_offset, width, height, username): #call this function with different amounts of offset to get the image
     img_id = img_id.replace("/", "").replace("\\", "")
     img = Image.open(imgs[int(img_id)]).convert("RGBA") #open image based on id
     img = img.resize((int(width), int(height)))
@@ -285,9 +276,7 @@ def get_image_piece(img_id, y_offset, width, height, username): #call this funct
     print(username, 'requested image piece for image "' + img_id + '" with y offset', y_offset)
     return colors #return data
 
-@client3.request
-@client4.request
-def stats(username):
+def handle_stats(username):
     print("getting project stats for", username)
     try:
         r = requests.get(f"https://scratch-info.vercel.app/api/v1/users/{username}/projectStats", timeout=6).json()
@@ -333,9 +322,8 @@ def stats(username):
                 data.append("{:,}".format(value))
     return data
 
-@client3.request
-@client4.request
-def pfp(username, resolution):
+
+def handle_pfp(username, resolution):
     try:
         print(f"Profile picture requested for {username}")
 
@@ -358,9 +346,8 @@ def pfp(username, resolution):
     except:
         return "User Not Found"
     
-@client3.request
-@client4.request
-def project_thumbnail(id, higher_quality):
+
+def handle_project_thumbnail(id, higher_quality):
     try:
         print(f"Project thumbnail requested for {id}")
 
@@ -385,9 +372,59 @@ def project_thumbnail(id, higher_quality):
     except:
         return "Error getting project thumbnail"
 
+@client3.request
+def ping(*args):
+    return handle_ping(*args)
+@client3.request
+def get_user_data(*args):
+    return handle_get_user_data(*args)
+@client3.request
+def get_project_data(*args):
+    return handle_get_project_data(*args)
+@client3.request
+def get_project_thumb_hq(*args):
+    return handle_get_project_thumb_hq(*args)
+@client3.request
+def get_image_piece(*args):
+    return handle_get_image_piece(*args)
+@client3.request
+def stats(*args):
+    return handle_stats(*args)
+@client3.request
+def pfp(*args):
+    return handle_pfp(*args)
+@client3.request
+def project_thumbnail(*args):
+    return handle_project_thumbnail(*args)
+
 @client3.event
 def on_ready():
     print("Request handler for Scratch Explorer on Scratch is running")
+
+@client4.request
+def ping(*args):
+    return handle_ping(*args)
+@client4.request
+def get_user_data(*args):
+    return handle_get_user_data(*args)
+@client4.request
+def get_project_data(*args):
+    return handle_get_project_data(*args)
+@client4.request
+def get_project_thumb_hq(*args):
+    return handle_get_project_thumb_hq(*args)
+@client4.request
+def get_image_piece(*args):
+    return handle_get_image_piece(*args)
+@client4.request
+def stats(*args):
+    return handle_stats(*args)
+@client4.request
+def pfp(*args):
+    return handle_pfp(*args)
+@client4.request
+def project_thumbnail(*args):
+    return handle_project_thumbnail(*args)
 
 @client4.event
 def on_ready():
