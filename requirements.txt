@@ -2,3 +2,5 @@ Flask
 Gunicorn
 scratchattach
 pillow
+requests
+python-dateutil

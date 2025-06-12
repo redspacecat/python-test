@@ -2,8 +2,10 @@ import scratchattach as sa
 import requests
 import urllib.request
 from PIL import Image
-import json, os, random, math, time
+import json, os, random, math, time, io
 from keep_alive import keep_alive
+from collections.abc import MutableMapping
+from dateutil import parser
 
 def log(*args):
     print(f"[{round(time.time())}]", *args)
@@ -14,6 +16,18 @@ def convertToNumber (s):
 def convertFromNumber (n):
     return n.to_bytes(math.ceil(n.bit_length() / 8), 'little').decode()
 
+def flatten(dictionary, parent_key='', separator='_'):
+    items = []
+    for key, value in dictionary.items():
+        new_key = parent_key + separator + key if parent_key else key
+        if isinstance(value, MutableMapping):
+            items.extend(flatten(value, new_key, separator=separator).items())
+        else:
+            items.append((new_key, value))
+    return dict(items)
+
+imgs = {}
+
 # if not os.path.isdir('/tmp/pfps'):
 #     os.mkdir('/tmp/pfps')
 
@@ -23,6 +37,12 @@ cloud1 = session.connect_cloud(992640266) #replace with your project id
 client1 = cloud1.requests()
 cloud2 = session.connect_cloud(996217996)
 client2 = cloud2.requests()
+cloud3 = session.connect_cloud(1186288264)
+client3 = cloud3.requests()
+
+##
+## Message count loader
+##
 
 @client1.request
 def ping(): #called when client receives request
@@ -76,6 +96,11 @@ def on_ready():
 # @client2.event
 # def on_ready():
 #     log("Request handler for pfp loader is running")
+
+
+##
+## Profile Picture Viewer
+##
 
 @client2.request
 def ping(username): #called when client receives request
@@ -148,7 +173,214 @@ def done(img_id):
 def on_ready():
     log("Request handler is running")
 
+##
+## Scratch Explorer
+##
+
+@client3.request
+def ping(): #called when client receives request
+    print(f"Ping for Scratch Explorer")
+    return "pong" #sends back 'pong' to the Scratch project
+
+@client3.request
+def get_user_data(username): #called when client receives request
+    print(f"getting data for {username}")
+    try:
+        r = requests.get(f"https://scratch-info.vercel.app/api/v1/users/{username}/info?mode=all", timeout=6)
+    except requests.exceptions.Timeout:
+        try:
+            r = requests.get(f"https://scratch-info.vercel.app/api/v1/users/{username}/info?mode=all", timeout=6)
+        except requests.exceptions.Timeout:
+            return "Timeout error"
+        
+    if (r.text == "404"):
+        return "Not Found"
+    else:
+        r = r.json()
+    data = []
+    for key, value in r.items():
+        if (key == "joinDate"):
+            value = value.split(",")[0]
+        data.append(key)
+        data.append(value)
+    print(f"returning data for {username}")
+    return data
+
+@client3.request
+def get_project_data(id):
+    try:
+        id = round(int(id))
+    except:
+        return "Invalid project id"
+    
+    print("Getting data for project id", id)
+    
+    try:
+        r = requests.get(f"https://scratch-info.vercel.app/api/v1/projects/{id}/info", timeout=6)
+    except requests.exceptions.Timeout:
+        try:
+            r = requests.get(f"https://scratch-info.vercel.app/api/v1/projects/{id}/info", timeout=6)
+        except requests.exceptions.Timeout:
+            return "Timeout error"
+
+    if (r.text == "404"):
+        return "Not Found" 
+    r = flatten(r.json())
+    data = []
+    for key, value in r.items():
+        if ("history" in key):
+            date = parser.parse(value)
+            value = f"{date.month}/{date.day}/{date.year}"
+        if ("stats" in key):
+            value = "{:,}".format(value)
+        if (key == "reviewStatus"):
+            if value == "notreviewed":
+                value = "Not Reviewed"
+            elif value == "safe":
+                value = "Safe (FE)"
+            elif value == "notsafe":
+                value = "Not Safe (NFE)"
+        data.append(key)
+        data.append(value)
+
+    print("Returning data for project id", id)
+    return data
+
+
+@client3.request
+def get_project_thumb_hq(id):
+    try:
+        img_url = f"https://uploads.scratch.mit.edu/get_image/project/{id}_480x360.png"
+        r = requests.get(img_url)
+        img_id = random.randint(0, 10000000)
+        imgs[img_id] = io.BytesIO(r.content)
+        print("Getting hq project thumb for id", id)
+        return img_id
+    except:
+        return "Error"
+
+@client3.request
+def get_image_piece(img_id, y_offset, width, height, username): #call this function with different amounts of offset to get the image
+    img_id = img_id.replace("/", "").replace("\\", "")
+    img = Image.open(imgs[int(img_id)]).convert("RGBA") #open image based on id
+    img = img.resize((int(width), int(height)))
+    width, height = img.size
+    pixels = img.load()
+
+    amount = 10
+
+    colors = [] #construct colors list
+    for y in range(int(y_offset), int(y_offset) + int(amount)): #get a specific chunk of the image
+        for x in range(width):
+            r, g, b, a = pixels[x, y]
+            color = a * 16777216 + r * 65536 + g * 256 + b
+            colors.append(color)
+    print(username, 'requested image piece for image "' + img_id + '" with y offset', y_offset)
+    return colors #return data
+
+@client3.request
+def stats(username):
+    print("getting project stats for", username)
+    try:
+        r = requests.get(f"https://scratch-info.vercel.app/api/v1/users/{username}/projectStats", timeout=6).json()
+    except requests.exceptions.Timeout:
+        try:
+            r = requests.get(f"https://scratch-info.vercel.app/api/v1/users/{username}/projectStats", timeout=6).json()
+        except requests.exceptions.Timeout:
+            r = {}
+    
+    try:
+        r["mp"] = r["projects"][0]
+    except IndexError:
+        return "Not Found"
+    if "projects" in r:
+        del r["projects"]
+    print("returning stats for", username)
+
+    data = []
+    for key, value in r.items():
+        if (key == "averageStats"):
+            data.append("averageViews")
+            data.append("{:,}".format(round(value["averageViews"])))
+            data.append("averageLoves")
+            data.append("{:,}".format(round(value["averageLoves"])))
+            data.append("averageFaves")
+            data.append("{:,}".format(round(value["averageFaves"])))
+        else:
+            if (key == "mp"):
+                data.append("p_loves")
+                data.append("{:,}".format(round(value["loves"])))
+                data.append("p_faves")
+                data.append("{:,}".format(round(value["faves"])))
+                data.append("p_views")
+                data.append("{:,}".format(round(value["views"])))
+                data.append("p_id")
+                data.append(value["id"])
+                data.append("p_loveToViewRatio")
+                data.append(round(value["loveToViewRatio"], 2))
+                data.append("p_title")
+                data.append(value["title"])
+            else: 
+                data.append(key)
+                data.append("{:,}".format(value))
+    return data
+
+@client3.request
+def pfp(username, resolution):
+    try:
+        print(f"Profile picture requested for {username}")
+
+        user = sa.get_user(username).id
+        url = "https://uploads.scratch.mit.edu/get_image/user/" + str(user) + "_100x100.png"
+        r = requests.get(url)
+
+        img = Image.open(io.BytesIO(r.content)).convert("RGBA")
+        img = img.resize((int(resolution), int(resolution)))
+        width, height = img.size
+        pixels = img.load()
+
+        colors = []
+        for y in range(height):
+            for x in range(width):
+                r, g, b, a = pixels[x, y]
+                color = a * 16777216 + r * 65536 + g * 256 + b
+                colors.append(color)
+        return colors
+    except:
+        return "User Not Found"
+    
+@client3.request
+def project_thumbnail(id, higher_quality):
+    try:
+        print(f"Project thumbnail requested for {id}")
+
+        if higher_quality == "1":
+            url = "https://uploads.scratch.mit.edu/get_image/project/" + str(id) + "_40x30.png"
+        else:
+            url = "https://uploads.scratch.mit.edu/get_image/project/" + str(id) + "_20x15.png"
+        r = requests.get(url)
+
+        img = Image.open(io.BytesIO(r.content)).convert("RGBA")
+        # img = img.resize((int(resolution), int(resolution)))
+        width, height = img.size
+        pixels = img.load()
+
+        colors = []
+        for y in range(height):
+            for x in range(width):
+                r, g, b, a = pixels[x, y]
+                color = a * 16777216 + r * 65536 + g * 256 + b
+                colors.append(color)
+        return colors
+    except:
+        return "Error getting project thumbnail"
+
+@client3.event
+def on_ready():
+    print("Request handler for Scratch Explorer is running")
+
 keep_alive()
 client1.start()
 client2.start()
+client3.start()
 log("Started stuff")
