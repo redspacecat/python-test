@@ -39,6 +39,8 @@ cloud2 = session.connect_cloud(996217996)
 client2 = cloud2.requests()
 cloud3 = session.connect_cloud(1186288264)
 client3 = cloud3.requests()
+cloud4 = sa.get_tw_cloud(1186288264) # turbowarp version
+client4 = cloud3.requests()
 
 ##
 ## Message count loader
@@ -178,11 +180,13 @@ def on_ready():
 ##
 
 @client3.request
+@client4.request
 def ping(username): #called when client receives request
     print(f"Ping for Scratch Explorer from {username}")
     return "pong" #sends back 'pong' to the Scratch project
 
 @client3.request
+@client4.request
 def get_user_data(username): #called when client receives request
     print(f"getting data for {username}")
     try:
@@ -207,6 +211,7 @@ def get_user_data(username): #called when client receives request
     return data
 
 @client3.request
+@client4.request
 def get_project_data(id):
     try:
         id = round(int(id))
@@ -248,6 +253,7 @@ def get_project_data(id):
 
 
 @client3.request
+@client4.request
 def get_project_thumb_hq(id):
     try:
         img_url = f"https://uploads.scratch.mit.edu/get_image/project/{id}_480x360.png"
@@ -260,6 +266,7 @@ def get_project_thumb_hq(id):
         return "Error"
 
 @client3.request
+@client4.request
 def get_image_piece(img_id, y_offset, width, height, username): #call this function with different amounts of offset to get the image
     img_id = img_id.replace("/", "").replace("\\", "")
     img = Image.open(imgs[int(img_id)]).convert("RGBA") #open image based on id
@@ -279,6 +286,7 @@ def get_image_piece(img_id, y_offset, width, height, username): #call this funct
     return colors #return data
 
 @client3.request
+@client4.request
 def stats(username):
     print("getting project stats for", username)
     try:
@@ -326,6 +334,7 @@ def stats(username):
     return data
 
 @client3.request
+@client4.request
 def pfp(username, resolution):
     try:
         print(f"Profile picture requested for {username}")
@@ -350,6 +359,7 @@ def pfp(username, resolution):
         return "User Not Found"
     
 @client3.request
+@client4.request
 def project_thumbnail(id, higher_quality):
     try:
         print(f"Project thumbnail requested for {id}")
@@ -377,10 +387,15 @@ def project_thumbnail(id, higher_quality):
 
 @client3.event
 def on_ready():
-    print("Request handler for Scratch Explorer is running")
+    print("Request handler for Scratch Explorer on Scratch is running")
+
+@client4.event
+def on_ready():
+    print("Request handler for Scratch Explorer on Turbowarp is running")
 
 keep_alive()
 client1.start()
 client2.start()
 client3.start()
+client4.start()
 log("Started stuff")
