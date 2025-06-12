@@ -40,7 +40,7 @@ client2 = cloud2.requests()
 cloud3 = session.connect_cloud(1186288264)
 client3 = cloud3.requests()
 cloud4 = sa.get_tw_cloud(1186288264) # turbowarp version
-client4 = cloud3.requests()
+client4 = cloud4.requests()
 
 ##
 ## Message count loader
