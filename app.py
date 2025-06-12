@@ -178,8 +178,8 @@ def on_ready():
 ##
 
 @client3.request
-def ping(): #called when client receives request
-    print(f"Ping for Scratch Explorer")
+def ping(username): #called when client receives request
+    print(f"Ping for Scratch Explorer from {username}")
     return "pong" #sends back 'pong' to the Scratch project
 
 @client3.request
